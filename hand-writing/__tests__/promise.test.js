@@ -6,7 +6,7 @@ describe('MyPromise 基础特性', () => {
   // 测试 Promise 初始化状态为 pending
   test('初始状态为 pending', () => {
     const promise = new MyPromise(() => {});
-    expect(promise.state).toBe('pending');
+    expect(promise.state).toBe('pending'); 
   });
 
   // 测试 resolve 成功状态
