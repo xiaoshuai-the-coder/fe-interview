@@ -6,53 +6,20 @@
  * @returns {Function} 节流后的函数（含cancel方法）
  */
 const throttle = (fn, wait, immediate = false) => {
-  let timer = null;
-  let lastCallTime = 0;
-  let isCanceled = false
+  let lastRunTime = null
+  return function (...args) {
+      if (immediate) {
+          fn.apply(this, args)
+      }
 
-  const throttled = function (...args) {
-    const now = Date.now();
-    const context = this;
+      const now = Date.now()
 
-    if (isCanceled) return;
+      if (now - lastRunTime >= wait) {
+        lastRunTime = now
+        fn.apply(this, args)
+      }
 
-    // 立即执行：首次触发直接执行
-    if (immediate && lastCallTime === 0) {
-      fn.apply(context, args);
-      lastCallTime = now;
-      return;
-    }
-    if (timer) {
-      clearTimeout(timer);
-      timer = null;
-      return
-    }
-    const timeRemaining = wait - (now - lastCallTime);
-
-    if (timeRemaining <= 0) {
-      // 间隔到期：直接执行
-      fn.apply(context, args);
-      lastCallTime = now;
-    } else {
-      // 间隔未到：设置定时器
-      timer = setTimeout(() => {
-        fn.apply(context, args);
-        lastCallTime = Date.now();
-        timer = null;
-      }, timeRemaining);
-    }
-  };
-
-  throttled.cancel = () => {
-    if (timer) {
-      clearTimeout(timer);
-      timer = null;
-    }
-    lastCallTime = 0;
-    isCanceled = true
-  };
-
-  return throttled;
+  }
 };
 
 /**
@@ -62,6 +29,19 @@ const throttle = (fn, wait, immediate = false) => {
  * @param {boolean} immediate - 是否立即执行
  * @returns {Function} 防抖后的函数（含cancel方法）
  */
-const debounce = (fn, wait = 0, immediate = false) => {};
+const debounce = (fn, wait = 0, immediate = false) => {
+    let timer = null
+    return function (...args) {
+      if (timer) {
+        clearTimeout(timer)
+        timer = null
+      }
+
+      timer = setTimeout(()=> {
+        fn.apply(this, args)
+        timer = null
+      }, wait)
+    }
+};
 
 module.exports = { throttle, debounce };

@@ -105,3 +105,36 @@ K --> L[返回vnode]
 合并策略: 按照先mixin后组件的方式，以数组形式进行合并
 执行顺序: mixin -> extend -> 组件  多个mixin按照数组顺序
 触发阶段: created(有状态无dom)  -> mounted(有dom)
+vue3的区别: 
+    1. 组合式api相比option api 更清晰
+    1. 从组件选项变为了 函数调用
+    1. 底层是effect副作用函数
+    1. 可以更好的复用
+    1. 无this绑定，状态通过闭包保存
+
+
+1. vue3声明周期重构
+时机：vue2 beforeCreate(无状态无dom), created(有状态无dom) setup: 组件实例创建后，状态初始化前
+优势: 
+    1. 无this，因此不受限
+    1. vue2钩子是手动调用callHook，属于被动调用。 vue3 setup是主动执行初始化
+    1. setup会被作为依赖收集，进行优化
+    1. 依赖effect，组件卸载时会停止所有依赖。避免了vue2手动清理不及时和不彻底
+原理: 通过registerHook注册到组件的实例，在生命周期的对应时间，由setupEffect执行
+
+
+1. Teleport
+通过剪切当前元素的dom到指定为止，但是保持上下文和状态不变
+原理: 通过传入的标签，选择器，ref，调用insertBefore进行插入。卸载时再移动回去
+
+
+1. 计算属性
+依赖收集 + 懒执行 + 脏标记，数据会被缓存，但是需要被访问时执行
+和watch的区别是，watch时主动执行
+处理数据时，优先使用computed，执行异步函数或者操作dom使用watch
+
+
+1. vue router初始化流程
+    1. 构建路由映射表
+    2. 生成路由
+懒加载的支持: router不进行组件的加载，借助esmodule + 异步组件进行，其实是等待组件加载完成后再执行后续守卫

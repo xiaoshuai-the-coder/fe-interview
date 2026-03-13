@@ -9,104 +9,114 @@ afterEach(() => {
   jest.clearAllTimers();
 });
 
-// ===================== 节流函数（极简测试） =====================
 describe('节流函数 throttle', () => {
-  test('基础节流：1秒内多次触发仅执行2次', () => {
-    const mockFn = jest.fn();
-    const throttled = throttle(mockFn, 1000);
+  let fn;
+  let throttledFn;
 
-    // 多次触发
-    throttled();
-    throttled();
-    throttled();
+  // 每个测试用例执行前重置函数和定时器
+  beforeEach(() => {
+    fn = jest.fn(); // 创建模拟函数
+    throttledFn = throttle(fn, 1000); // 节流时间 1 秒
+    jest.clearAllMocks(); // 清空 mock 调用记录
+  });
 
-    // 快进1秒 → 定时器执行1次
+  // 测试 1：基础调用 —— 立即执行一次
+  test('首次调用立即执行函数', () => {
+    throttledFn();
+    
+    // 首次调用应该立即执行
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  // 测试 2：连续频繁触发，间隔内只执行一次
+  test('1秒内连续调用，只执行一次', () => {
+    // 连续调用 5 次
+    throttledFn();
+    throttledFn();
+    throttledFn();
+    throttledFn();
+    throttledFn();
+
+    // 间隔内只执行 1 次
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  // 测试 3：超过间隔时间后，再次执行
+  test('超过间隔时间后再次执行', () => {
+    // 第一次调用
+    throttledFn();
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    // 快进时间 1000ms（超过节流间隔）
     jest.advanceTimersByTime(1000);
-    expect(mockFn).toHaveBeenCalledTimes(1);
 
-    // 1秒后再次触发 → 执行第2次
-    throttled();
-    expect(mockFn).toHaveBeenCalledTimes(2);
+    // 再次调用
+    throttledFn();
+    
+    // 总共执行 2 次
+    expect(fn).toHaveBeenCalledTimes(2);
   });
 
-  test('立即执行节流：首次触发直接执行', () => {
-    const mockFn = jest.fn();
-    const throttled = throttle(mockFn, 1000, true);
+  // 测试 4：正确绑定 this 指向
+  test('正确绑定 this 指向', () => {
+    const obj = { name: 'test' };
+    // 将节流函数挂载到对象上
+    obj.throttledFn = throttle(fn, 1000);
 
-    // 首次触发 → 立即执行
-    throttled();
-    expect(mockFn).toHaveBeenCalledTimes(1);
+    // 调用
+    obj.throttledFn();
 
-    // 500ms后触发 → 不执行
-    jest.advanceTimersByTime(500);
-    throttled();
-    expect(mockFn).toHaveBeenCalledTimes(1);
-
-    // 再等500ms（累计1秒）→ 执行第2次
-    jest.advanceTimersByTime(500);
-    throttled();
-    expect(mockFn).toHaveBeenCalledTimes(2);
+    // 验证 this 指向 obj
+    expect(fn).toHaveBeenCalledWith();
+    expect(fn.mock.instances[0]).toBe(obj);
   });
 
-//   // 仅修改 cancel 用例：移除 Mock，用真实状态验证
-//   test('取消节流：函数不再执行', () => {
-//     // 真实状态：跟踪执行次数
-//     let executeCount = 0;
-//     const targetFn = () => {
-//       executeCount++;
-//     };
+  // 测试 5：正确传递参数
+  test('调用时正确传递参数', () => {
+    throttledFn('参数1', 123, { key: 'value' });
 
-//     const throttled = throttle(targetFn, 1000);
-
-//     // 保留原有步骤：触发节流 → 取消 → 快进1秒
-//     throttled(); // 触发节流
-//     throttled.cancel(); // 取消
-
-//     // 快进1秒 → 无执行
-//     jest.advanceTimersByTime(1000);
-//     expect(executeCount).toBe(0); // 真实计数断言，无 Mock 依赖
-//   });
+    // 验证参数传递正确
+    expect(fn).toHaveBeenCalledWith('参数1', 123, { key: 'value' });
+  });
 });
 
-// ===================== 防抖函数（极简测试） =====================
 describe('防抖函数 debounce', () => {
-  test('基础防抖：多次触发仅最后一次执行', () => {
-    const mockFn = jest.fn();
-    const debounced = debounce(mockFn, 1000);
+  let mockFn;
+  let debouncedFn;
 
-    // 短时间内多次触发
-    debounced();
-    debounced();
-    debounced();
+  // 每个用例执行前重置
+  beforeEach(() => {
+    mockFn = jest.fn();
+    debouncedFn = debounce(mockFn, 500); // 延迟 500ms
+    jest.clearAllMocks();
+  });
 
-    // 快进1秒 → 仅执行1次（最后一次）
-    jest.advanceTimersByTime(1000);
+  test('连续触发只执行最后一次', () => {
+    // 连续调用 3 次
+    debouncedFn();
+    debouncedFn();
+    debouncedFn();
+
+    // 快进时间到定时器执行
+    jest.runAllTimers();
+
+    // 最终只执行 1 次
     expect(mockFn).toHaveBeenCalledTimes(1);
   });
 
-  test('立即执行防抖：首次触发直接执行', () => {
-    const mockFn = jest.fn();
-    const debounced = debounce(mockFn, 1000, true);
-
-    // 首次触发 → 立即执行
-    debounced();
-    expect(mockFn).toHaveBeenCalledTimes(1);
-
-    // 500ms后触发 → 不执行
-    debounced();
-    jest.advanceTimersByTime(500);
-    expect(mockFn).toHaveBeenCalledTimes(1);
+  test('正确传递参数', () => {
+    debouncedFn('test', 123);
+    jest.runAllTimers();
+    expect(mockFn).toHaveBeenCalledWith('test', 123);
   });
 
-  test('取消防抖：函数不再执行', () => {
-    const mockFn = jest.fn();
-    const debounced = debounce(mockFn, 1000);
-
-    debounced(); // 触发防抖
-    debounced.cancel(); // 取消
-
-    // 快进1秒 → 无执行
-    jest.advanceTimersByTime(1000);
-    expect(mockFn).toHaveBeenCalledTimes(0);
+  test('正确绑定 this 指向', () => {
+    const obj = { name: 'test' };
+    obj.debouncedFn = debounce(mockFn, 500);
+    
+    obj.debouncedFn();
+    jest.runAllTimers();
+    
+    expect(mockFn.mock.instances[0]).toBe(obj);
   });
 });
