@@ -83,3 +83,4 @@ temp/
 # 本地开发工具
 .husky/
 .commitlintrc.local
+.cursor/** */

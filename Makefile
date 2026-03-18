@@ -21,6 +21,10 @@ create:
 	@echo "  业务文件：$(SRC_DIR)/$(name).js"
 	@echo "  测试文件：$(TEST_DIR)/$(name).test.js"
 
+tree:
+	@echo "📁 生成项目目录结构（排除 node_modules & coverage）..."
+	tree -I 'node_modules|coverage'
+	
 # 忽略多余参数（必须加这行）
 %:
 	@:
