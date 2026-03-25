@@ -15,10 +15,10 @@ create:
 	# 获取文件名
 	$(eval name := $(filter-out $@,$(MAKECMDGOALS)))
 	@mkdir -p $(SRC_DIR) $(TEST_DIR)
-	@touch $(SRC_DIR)/$(name).js
+	@touch $(SRC_DIR)/$(name).ts
 	@touch $(TEST_DIR)/$(name).test.js
 	@echo "✅ 创建成功！"
-	@echo "  业务文件：$(SRC_DIR)/$(name).js"
+	@echo "  业务文件：$(SRC_DIR)/$(name).ts"
 	@echo "  测试文件：$(TEST_DIR)/$(name).test.js"
 
 tree:

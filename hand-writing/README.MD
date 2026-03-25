@@ -9,6 +9,7 @@
 - [深拷贝 deepClone](#深拷贝-deepclone)
 - [数组扁平化 flatten](#数组扁平化-flatten)
 - [并发控制 ConcurrentControl](#并发控制-concurrentcontrol)
+- [事件总线 EventBus](#事件总线-eventbus)
 - [TypeScript 实战：实现 get(obj, 'a.b.c')](#typescript-实战实现-getobja-b-c)
 
 ## 自定义 Promise
@@ -84,6 +85,23 @@
 
 - **实现**：[`concurrentControl.ts`](./concurrentControl.ts)
 - **测试**：[`__tests__/concurrentControl.test.js`](./__tests__/concurrentControl.test.js)
+
+## 事件总线 EventBus
+
+### 思路
+
+- **发布订阅模式**：事件总线是典型的观察者模式实现，起到解耦作用。
+- **核心 API**：
+  - `on(event, fn)`：订阅事件，可选是否只执行一次。
+  - `off(event, fn?)`：取消订阅，不传 fn 则清除该事件所有监听。
+  - `emit(event, ...args)`：发布事件，触发对应回调。
+  - `once(event, fn)`：单次订阅，执行后自动取消。
+- **实现要点**：用 Map 存储事件名与回调的映射，支持单次执行标记。
+
+### 代码链接
+
+- **实现**：[`eventBus.ts`](./eventBus.ts)
+- **测试**：[`__tests__/eventBus.test.js`](./__tests__/eventBus.test.js)
 
 ## TypeScript 实战：实现 get(obj, 'a.b.c')
 
