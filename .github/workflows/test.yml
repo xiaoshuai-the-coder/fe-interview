@@ -48,4 +48,4 @@ jobs:
           head: dev
           base: master
           body: 'Auto-merged from dev after passing tests'
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.MY_GITHUB_TOKEN }}
