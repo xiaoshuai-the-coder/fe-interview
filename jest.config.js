@@ -3,9 +3,14 @@ module.exports = {
   testEnvironment: 'jsdom', // 模拟浏览器环境（前端项目必选，Node.js项目可改为'node'）
   rootDir: './', // 项目根目录
   testMatch: [
-    '**/__tests__/**/*.js', // 匹配__tests__目录下的所有js测试文件
-    '**/?(*.)+(spec|test).js' // 匹配所有*.test.js/*.spec.js文件
+    '**/__tests__/**/*.ts',
+    '**/__tests__/**/*.js',
+    '**/?(*.)+(spec|test).ts',
+    '**/?(*.)+(spec|test).js'
   ],
+  transform: {
+    '^.+\\.ts$': 'ts-jest' // 支持 TypeScript
+  },
   testPathIgnorePatterns: [
     '/node_modules/', // 忽略node_modules
     '/dist/', // 忽略构建产物
@@ -13,7 +18,7 @@ module.exports = {
   ],
 
   // 2. 模块解析
-  moduleFileExtensions: ['js', 'json'], // 识别的文件后缀
+  moduleFileExtensions: ['ts', 'js', 'json'], // 识别的文件后缀
   moduleDirectories: ['node_modules', 'src'], // 模块查找目录
   // 路径别名（按需配置，比如src目录别名@）
   moduleNameMapper: {
@@ -26,7 +31,7 @@ module.exports = {
   // 4. 覆盖率配置
   collectCoverage: false, // 默认关闭覆盖率（运行时加--coverage开启）
   collectCoverageFrom: [
-    '**/*.js', // 统计src目录下所有JS文件的覆盖率
+    '**/*.ts', // 统计所有 TypeScript 文件的覆盖率
     '!src/**/*.config.js', // 排除配置文件
     '!src/**/index.js', // 可选：排除入口文件
     '!**/node_modules/**'

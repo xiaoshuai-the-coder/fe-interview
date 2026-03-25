@@ -8,6 +8,8 @@
 - [防抖与节流](#防抖与节流)
 - [深拷贝 deepClone](#深拷贝-deepclone)
 - [数组扁平化 flatten](#数组扁平化-flatten)
+- [并发控制 ConcurrentControl](#并发控制-concurrentcontrol)
+- [事件总线 EventBus](#事件总线-eventbus)
 - [TypeScript 实战：实现 get(obj, 'a.b.c')](#typescript-实战实现-getobja-b-c)
 
 ## 自定义 Promise
@@ -16,9 +18,9 @@
 
 - **状态机**：Promise 只有 `pending/fulfilled/rejected` 三种状态，且一旦从 `pending` 迁移就不可逆。
 - **异步回调**：`then/catch/finally` 的回调需要异步执行。这里用 `queueMicrotask` 把回调放进微任务队列，保证行为与原生 Promise 更接近。
-- **链式调用**：`then` 必须返回一个新的 Promise；回调的返回值需要经过“Promise 解析过程”（`resolvePromise`）来决定新 Promise 的状态和值。
+- **链式调用**：`then` 必须返回一个新的 Promise；回调的返回值需要经过「Promise 解析过程」来决定新 Promise 的状态和值。
 - **值透传/错误冒泡**：`then` 的参数如果不是函数，要提供默认处理（fulfilled 值透传；rejected 抛出错误），这样链路上没有显式处理也能正确传递。
-- **常见边界**：循环引用（`newPromise === result`）、回调抛错、返回值为 Promise/thenable、`all/race/allSettled` 的收敛逻辑。
+- **常见边界**：循环引用、回调抛错、返回值为 Promise/thenable、`all/race/allSettled` 的收敛逻辑。
 
 ### 代码链接
 
@@ -29,7 +31,7 @@
 
 ### 思路
 
-- **防抖（debounce）**：触发后延迟执行；在延迟期间重复触发会重置计时器。适合输入框联想、窗口 resize 等“只关心最后一次”的场景。
+- **防抖（debounce）**：触发后延迟执行；在延迟期间重复触发会重置计时器。适合输入框联想、窗口 resize 等「只关心最后一次」的场景。
 - **节流（throttle）**：单位时间内最多执行一次；适合滚动监听、拖拽等高频触发场景。
 - **实现要点**：
   - 通过闭包保存 `timer/lastRunTime` 等状态。
@@ -39,6 +41,7 @@
 ### 代码链接
 
 - **实现**：[`debounce-throttle.js`](./debounce-throttle.js)
+- **测试**：[`__tests__/debounce.throttle.test.js`](./__tests__/debounce.throttle.test.js)
 
 ## 深拷贝 deepClone
 
@@ -52,18 +55,53 @@
 ### 代码链接
 
 - **实现**：[`deepClone.js`](./deepClone.js)
+- **测试**：[`__tests__/deepClone.test.js`](./__tests__/deepClone.test.js)
 
 ## 数组扁平化 flatten
 
 ### 思路
 
 - **递归展开**：遍历数组元素，遇到子数组则递归，把结果拼回同一个数组。
-- **复杂度**：时间复杂度 \(O(n)\)（每个元素处理一次），空间复杂度与递归深度相关。
+- **复杂度**：时间复杂度 O(n)（每个元素处理一次），空间复杂度与递归深度相关。
 - **可扩展点**：如果需要对齐 `Array.prototype.flat(depth)`，可以加入 `depth` 参数控制展开层数；也可以用栈实现以避免深递归。
 
 ### 代码链接
 
 - **实现**：[`flatten.js`](./flatten.js)
+- **测试**：[`__tests__/flatten.test.js`](./__tests__/flatten.test.js)
+
+## 并发控制 ConcurrentControl
+
+### 思路
+
+- **场景**：限制同一时间执行的任务数量，常用于控制并发请求数、避免资源耗尽。
+- **实现要点**：
+  - 用队列保存待执行任务，用计数器记录当前运行数量。
+  - 每次取任务时检查是否已达上限，未达则启动新任务。
+  - 任务完成后从队列取下一个任务执行，形成链式调用。
+- **类型设计**：使用泛型支持不同返回值类型，保持 API 简洁。
+
+### 代码链接
+
+- **实现**：[`concurrentControl.ts`](./concurrentControl.ts)
+- **测试**：[`__tests__/concurrentControl.test.js`](./__tests__/concurrentControl.test.js)
+
+## 事件总线 EventBus
+
+### 思路
+
+- **发布订阅模式**：事件总线是典型的观察者模式实现，起到解耦作用。
+- **核心 API**：
+  - `on(event, fn)`：订阅事件，可选是否只执行一次。
+  - `off(event, fn?)`：取消订阅，不传 fn 则清除该事件所有监听。
+  - `emit(event, ...args)`：发布事件，触发对应回调。
+  - `once(event, fn)`：单次订阅，执行后自动取消。
+- **实现要点**：用 Map 存储事件名与回调的映射，支持单次执行标记。
+
+### 代码链接
+
+- **实现**：[`eventBus.ts`](./eventBus.ts)
+- **测试**：[`__tests__/eventBus.test.js`](./__tests__/eventBus.test.js)
 
 ## TypeScript 实战：实现 get(obj, 'a.b.c')
 
@@ -71,11 +109,9 @@
 
 - **路径解析**：将 `'a.b.c'` 按 `.` 切分为 keys，逐层向下取值。
 - **空值短路**：中间层级一旦为 `null/undefined` 就停止并返回 `undefined`（或约定的默认值）。
-- **返回类型**：如果想做“类型体操”，可以用泛型 + 字符串字面量路径推导返回值类型；面试中也可先实现运行时版本，再讨论如何增强类型。
+- **返回类型**：如果想做「类型体操」，可以用泛型 + 字符串字面量路径推导返回值类型；面试中也可先实现运行时版本，再讨论如何增强类型。
 
 ### 代码链接
 
-- **题目描述**：使用 TypeScript 实现一个 `get` 函数，用于获取对象属性值，支持嵌套属性获取。例如：
-  - `const data = { name: 'tom', age: 18, address: { city: 'beijing' } }`
-  - `get(data, 'address.city') // 'beijing'`
-  - 需要处理属性不存在的情况。（石墨三面高频编程题）
+- **实现**：[`get.ts`](./get.ts)
+- **测试**：[`__tests__/get.test.js`](./__tests__/get.test.js)
