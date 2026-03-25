@@ -75,7 +75,5 @@
 
 ### 代码链接
 
-- **题目描述**：使用 TypeScript 实现一个 `get` 函数，用于获取对象属性值，支持嵌套属性获取。例如：
-  - `const data = { name: 'tom', age: 18, address: { city: 'beijing' } }`
-  - `get(data, 'address.city') // 'beijing'`
-  - 需要处理属性不存在的情况。（石墨三面高频编程题）
+- **实现**：[`get.ts`](./get.ts)
+- **测试**：[`__tests__/get.test.js`](./__tests__/get.test.js)
