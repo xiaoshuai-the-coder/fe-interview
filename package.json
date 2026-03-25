@@ -5,6 +5,7 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:watch:debug": "node --inspect ./node_modules/jest/bin/jest.js --runInBand",
     "test:coverage": "jest --coverage"
   },
   "keywords": [],
