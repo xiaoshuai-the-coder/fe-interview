@@ -34,7 +34,7 @@ class EventBus implements EventBusInterface {
           this.off(event);
         }
       });
-    }
+    } 
   }
   off(event: string, fn?: Function) {
     const eventInfo = this.events.get(event);

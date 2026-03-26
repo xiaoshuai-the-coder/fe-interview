@@ -12,7 +12,9 @@
 - **Node.js**：[`basic/nodejs.md`](./basic/nodejs.md)
 - **Vue**：[`basic/vue.md`](./basic/vue.md)
 - **Java**：[`basic/java.md`](./basic/java.md)
-- **架构设计**：[`basic/architect.md`](./basic/architect.md)
+- **TypeScript**：[`basic/typescript.md`](./basic/typescript.md)
+- **跨端方案**：[`basic/cross-plantform.md`](./basic/cross-plantform.md)
+- **网络基础**：[`basic/network.md`](./basic/network.md)
 
 ## 手写代码
 

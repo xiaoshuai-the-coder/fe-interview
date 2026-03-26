@@ -6,7 +6,12 @@
 
 - **浏览器事件循环**通常可以粗略理解为：执行一个宏任务（task）→ 清空微任务（microtask）→ 进行一次渲染（若需要）→ 进入下一轮循环。
 - **Node.js 事件循环**底层基于 **libuv**，每一轮循环会在多个阶段（phase）之间流转。常见阶段可以记成：
-  - `timers` → `pending callbacks` → `idle/prepare` → `poll` → `check` → `close callbacks`
+  - timers: 处理setTimeout 和 setInterval
+  - callback 处理上一轮事件循环延迟的io回调
+  - idel node使用
+  - poll 核心阶段，获取新的io事件，处理完成事件的回调，如果无任务，就阻塞等待
+  - check 执行setImmidate
+  - close callback 执行 socket.close 等关闭操作
 
 ### Node.js 版本差异（宏/微任务）
 
@@ -21,3 +26,6 @@
 - 因为优先级更高，如果递归地不断塞入 `nextTick`，可能导致 I/O 或 timers 长时间得不到机会执行，引发“饿死”问题。
 
 > 这份笔记只做面试表达层面的梳理；如果需要，我也可以在这里补一段可运行的示例代码，用输出顺序来验证宏任务/微任务/nextTick 的优先级差异。
+
+## 非阻塞IO 
+发起IO操作，如文件读写或者网络请求后，不会等待返回结果。 继续执行其他任务，等待操作完成后通过回调来获取结果
